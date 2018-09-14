@@ -1,29 +1,37 @@
+function Store (req) {
+    this.id = req.id;
+    this.name = req.name;
+    this.managerEmployeeId = req.managerEmployeeId;
+    //this.address = req.address;
+}
+
 const database = require('./db');
 const storesRef = database.ref('/stores');
 
-exports.createStore = function(name, managerEmployeeId) {
-    store = {
-        name: name,
-        managerEmployeeId: managerEmployeeId,
-    };
+Store.prototype.postStore = (store, address) => {
 
-    return store;
+    storesRef.child(store.id).set({
+        name: store.name,
+        managerEmployeeId: store.managerEmployeeId
+    }, (error) => {
+        if (error) {
+            throw error;
+        }
+        else {
+            console.log("Push store successful!");
+            storesRef.child(store.id).child("location").set(address, (error) => {
+                if (error) {
+                    throw error;
+                }
+                else {
+                    console.log("Push address successful!");
+                }
+            });
+        }
+    });
 }
 
-exports.createAddress = function(address_line, suburb, province, city_town, postal_code, country) {
-    address = {
-        address_line: address_line,
-        suburb: suburb,
-        province: province,
-        city_town: city_town,
-        postal_code: postal_code,
-        country: country
-    };
-
-    return address;
-}
-
-exports.getStores = () => {
+Store.getStores = () => {
     let stores = [];
 
     return new Promise((resolve, reject) => {
@@ -38,37 +46,21 @@ exports.getStores = () => {
     });
 }
 
-exports.getLocations = () => {
-    let locations = [];
-
-    storesRef.once('value', (snapshot) => {
-        snapshot.forEach((child) => {
-            var store = child.val();
-            location.push(store.address);
-        }, (error) => {
-            if(error) {
-                throw error;
-            }
-            else {
-                console.log("Fetch locations successful!");
-            }
-        });
-
-        return locations;
-    });
-
+Store.prototype.toString = () => {
+    return this.id + this.name + this.managerEmployeeId;
 }
 
-exports.postStore = (id, store, address) => {
+module.exports = Store;
 
-    storesRef.child(id).set(store, (error) => {
-        if (error) {
-            throw error;
-        }
-        else {
-            console.log("Push store successful!");
-
-            storesRef.child(id).child("location").set(address, (error) => {
+/*
+ storesRef.child(this.id).child("location").set({
+                addressLine: this.address.addressLine,
+                city_town: this.address.city_town,
+                country: this.address.country,
+                postalCode: this.address.postalCode,
+                province: this.address.province,
+                suburb: this.address.suburb
+            }, (error) => {
                 if (error) {
                     throw error;
                 }
@@ -76,6 +68,4 @@ exports.postStore = (id, store, address) => {
                     console.log("Push address successful!");
                 }
             });
-        }
-    });
-}
+*/
