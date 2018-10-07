@@ -11,6 +11,12 @@
   "license": "ISC",
   "dependencies": {
     "config": "^2.0.1",
-    "express": "^4.16.3"
+    "cors": "^2.8.4",
+    "create-react-app": "^1.5.2",
+    "express": "^4.16.3",
+    "firebase": "^5.4.0",
+    "firebase-admin": "^6.0.0",
+    "npx": "^10.2.0",
+    "socket.io": "^2.1.1"
   }
 }
