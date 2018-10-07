@@ -7,7 +7,8 @@ function Location (address) {
     this.suburb = address.suburb;
 }
 
-const database = require('./db');
+const db = require('./db');
+const database = db.database;
 const storesRef = database.ref('/stores');
 
 Location.getLocations = () => {

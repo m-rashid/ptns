@@ -28,7 +28,27 @@ storeController.retrieveLocations = (req, res) => {
     locationPromise.then((locations) => {
         console.log(locations);
         res.send(locations);
+        return locations;
     });
+}
+
+storeController.retrieveEmployees = (req, res) => {
+    var employeePromise = Store.retrieveEmployees(req.params.id);
+    employeePromise.then((employees) => {
+        console.log(employees);
+        res.send(employees);
+        return employees;
+    });
+}
+
+storeController.update = (req, res) => {
+    try {
+        Store.updateStore(req.params.id, req.body);
+        res.send("Success!");
+    }
+    catch(error) {
+        res.send(error);
+    }
 }
 
 module.exports = storeController;

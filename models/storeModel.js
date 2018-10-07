@@ -5,8 +5,10 @@ function Store (req) {
     //this.address = req.address;
 }
 
-const database = require('./db');
+const db = require('./db');
+const database = db.database;
 const storesRef = database.ref('/stores');
+const employeesRef = database.ref('/employees');
 
 Store.prototype.postStore = (store, address) => {
 
@@ -44,6 +46,34 @@ Store.getStores = () => {
             resolve(stores);
         });
     });
+}
+
+Store.retrieveEmployees = (storeId) => {
+    let employees = [];
+    return new Promise((resolve, reject) => {
+        employeesRef.child(storeId).once('value', (snapshot) => {
+            snapshot.forEach((child) => {
+                var employee = child.val();
+                employees.push(employee);
+            });
+            resolve(employees);
+        });
+    });
+}
+
+Store.getStoreFromEmployee = (uid) => {
+    let storeId = "";
+    let query = employeesRef.child(storeId).orderByChild("store_id").equalTo(uid);
+
+}
+
+Store.updateStore = (id, store) => {
+    console.log(id);
+    console.log(store);
+    storesRef.child(id).set(store, (error) => {
+        if(error) throw(error);
+        else console.log("Product update successful!");
+    }); 
 }
 
 Store.prototype.toString = () => {

@@ -1,7 +1,19 @@
-const database = require('./db');
+function Employee (req) {
+    this.id = req.id;
+    this.first_name = req.first_name;
+    this.last_name = req.last_name;
+    this.store_id = req.store_id;
+    this.email = req.email,
+    this.password = req.password,
+    this.role = req.role
+}
+
+const db = require('./db');
+const database = db.database;
+const authController = require('../controllers/authController');
 const employeesRef = database.ref('/employees');
 
-exports.getEmployees = () => {
+Employee.getEmployees = () => {
     let employees = [];
 
     return new Promise((resolve, reject) => {
@@ -16,25 +28,144 @@ exports.getEmployees = () => {
     });
 }
 
-exports.postEmployee = (employee) => {
-
-    employeesRef.push(employee, (error) => {
-        if(error) {
-            throw (error);
-        }
-        else {
-            console.log("Push employee successful!");
-        }
-    });  
+Employee.deleteEmployee = (id) => {
+    database.ref(`/storeEmployees/${id}`).once('value', (snapshot) => {
+        var store = snapshot.val();
+        database.ref(`employees/${store}/${id}`).remove(error => {
+            if(error) console.log(error)
+            else{
+                console.log(`Successfully deleted employee ${id}`);
+            }
+        });
+    });
 }
 
-exports.createEmployee = function(id, first_name, last_name, store_id) {
-    employee = {
-        id: id,
-        first_name: first_name,
-        last_name: last_name,
-        store_id: store_id
-    };
-
-    return employee;
+function getUserfromToken(idToken) {
+    const user = authController.verifyToken(idToken);
+    return user;
 }
+
+Employee.checkIfManager = (userId) => {
+    return new Promise ((resolve, reject) => {
+        var managersRef = database.ref('/managers');
+        managersRef.child(userId).once('value', (snapshot) => {
+            if(snapshot.val() !== null) resolve(true);
+            else reject(false);
+        });
+    });
+    
+}
+
+Employee.prototype.createEmployee =  (employee, idToken) => {
+    
+    let errorMessage = "";
+    return new Promise ((resolve, reject) => {
+        var authVerifyPromise = authController.verifyToken(idToken);
+        authVerifyPromise.then((user) => {
+            console.log("user: ",user);
+            checkIfManager(user.uid)
+            .then ((manager) => {
+                console.log("manager: ",manager);
+                if (manager == false) {
+                    reject("unauthorized access");
+                }
+                if (manager) {
+                    Employee.postEmployee(employee);
+                    Employee.createUser(employee);
+                    Employee.mapEmployToStore(employee.id, employee.store_id);
+                    resolve("Success!");
+                }
+            })
+            .catch ((err) => {
+                console.log(err);
+                errorMessage = err;
+            })
+        })
+        .catch((error) => {
+            console.log(error);
+           errorMessage += error;
+        });
+        
+        if(errorMessage != "") reject(errorMessage);
+    })
+}
+
+Employee.postEmployee = (employee) => {
+    return new Promise( (resolve, reject) => {
+        employeesRef.child(employee.store_id).child(employee.id).set(employee, (error) => {
+            if(error) {
+                reject(error);
+            }
+            else {
+                Employee.createUser(employee);
+                Employee.mapEmployToStore(employee.id, employee.store_id);
+                resolve("Employee push successful!")
+            }
+        }); 
+    });
+    
+}
+
+Employee.getEmployeeData = (id) => {
+    /*
+    let storeId = "";
+    let storePromise = new Promise((resolve, reject) => {
+        //employeesRef.child(employee.id).set(employee, (error) => {
+        employeesRef.child(employee.store_id).child(employee.id).set(employee, (error) => {
+            if(error) {
+                console.log("Error");
+                reject(error);
+            }
+            else {
+                resolve("Push employee successful!");
+                Employee.createUser(employee);
+                Employee.mapEmployToStore(employee.id, employee.store_id);
+            }
+        });  
+    });
+
+    storePromise.then((storeId) => {
+        console.log(storeId);
+        storeId = storeId;
+    });
+    */
+   return new Promise((resolve, reject) => {
+    database.ref(`/storeEmployees/${id}`).once('value', (snapshot) => {
+            var store = snapshot.val();
+            console.log(`store id: ${store}`);
+            database.ref(`employees/${store}/${id}`).on('value', (dataSnapshot) => {
+                var employee = dataSnapshot.val();
+                resolve(employee);
+            });
+        });
+    });
+}
+
+Employee.prototype.getStore = (id) => {
+    var store = employeesRef.child(id).once('value', (snapshot) => {
+
+    })
+}
+
+Employee.createUser = (employee) => {
+    authController.createEmployeeUser(employee);
+}
+
+Employee.mapEmployToStore = (employeeId, storeId) => {
+    return new Promise ((resolve, reject) => {
+        database.ref('/storeEmployees').child(employeeId).set(storeId).
+        then(() => {
+            resolve("mapping succeeded!");
+        })
+        .catch((err) => {
+            reject(err);
+        })
+    });
+    
+}
+
+Employee.prototype.toString = () => {
+    return this.id + this.first_name + this.last_name;
+}
+
+module.exports = Employee;
