@@ -99,6 +99,7 @@ Employee.postEmployee = (employee) => {
             else {
                 Employee.createUser(employee);
                 Employee.mapEmployToStore(employee.id, employee.store_id);
+                Employee.addManagerAdmin(emloyee);
                 resolve("Employee push successful!")
             }
         }); 
@@ -149,7 +150,7 @@ Employee.prototype.getStore = (id) => {
 
 Employee.addManagerAdmin = (employee) => {
     if (employee.role === "manager" || employee.role === "admin") {
-        database.ref(`/${employee.role}`).child(empoyee.id).set(employee.store_id)
+        database.ref(`/${employee.role}s`).child(empoyee.id).set(employee.store_id)
         .then (() => console.log(`${employee.role} added!`))
         .catch((error) => console.log(error));
     }
