@@ -99,6 +99,7 @@ Employee.postEmployee = (employee) => {
             else {
                 Employee.createUser(employee);
                 Employee.mapEmployToStore(employee.id, employee.store_id);
+                Employee.addManagerAdmin(emloyee);
                 resolve("Employee push successful!")
             }
         }); 
@@ -145,6 +146,14 @@ Employee.prototype.getStore = (id) => {
     var store = employeesRef.child(id).once('value', (snapshot) => {
 
     })
+}
+
+Employee.addManagerAdmin = (employee) => {
+    if (employee.role === "manager" || employee.role === "admin") {
+        database.ref(`/${employee.role}`).child(empoyee.id).set(employee.store_id)
+        .then (() => console.log(`${employee.role} added!`))
+        .catch((error) => console.log(error));
+    }
 }
 
 Employee.createUser = (employee) => {
