@@ -99,7 +99,7 @@ Employee.postEmployee = (employee) => {
             else {
                 Employee.createUser(employee);
                 Employee.mapEmployToStore(employee.id, employee.store_id);
-                Employee.addManagerAdmin(emloyee);
+                Employee.addManagerAdmin(employee);
                 resolve("Employee push successful!")
             }
         }); 
