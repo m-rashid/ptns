@@ -3,6 +3,7 @@ const authController = require('./authController');
 
 const employeeController = {};
 
+/*
 employeeController.create = (req, res) => {
     const employee = new Employee(req.body);
     const idToken = req.headers.authauth;
@@ -25,14 +26,11 @@ employeeController.create = (req, res) => {
         })
     })
 }
-
-/*
+*/
 employeeController.create = (req, res) => {
     const employee = new Employee(req.body);
-    const idToken = req.headers.authauth;
     console.log(employee);
-    console.log("idToken",idToken);
-    var postPromise = employee.createEmployee(employee, idToken);
+    var postPromise = Employee.postEmployee(employee);
     postPromise.then((result) => {
             res.send(result);
     })
@@ -40,7 +38,7 @@ employeeController.create = (req, res) => {
             res.send(error.code);
     });
 }
-*/
+
 employeeController.retrieve =  (req, res) => {
     var employeesPromise = Employee.getEmployees();
     employeesPromise.then((employees) => {
