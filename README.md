@@ -15,7 +15,7 @@ The entire project is developed using the Javascript runtime environment, _Node.
   
   
 ### Installation
-There are two aspects to this project, the Node/Express.js back-end and a React front-end application. The follow steps will get a development environment running on your machine.
+There are two aspects to this project, the Node/Express.js back-end and a React front-end application[^1]. The following steps will get a development environment running on your machine.
 
 1. CLone the Git repository or download the source files from Github:
 Clone the Git repository for PTNS: `https://github.com/m-rashid/ptns.git`.  
@@ -24,7 +24,7 @@ Clone the Git repository for PTNS: `https://github.com/m-rashid/ptns.git`.
     * `cd api-backend`
     * run the following in the command line: `npm install`
     * configure Firebase Admin SDK:  
-      Create a Firebase project and follow [this](https://firebase.google.com/docs/admin/setup) to download your Service Account credentials file. Place this file in the `/api-backend` folder.
+      Create a Firebase project and follow [this guide](https://firebase.google.com/docs/admin/setup) to download your Service Account credentials file. Place this file in the `/api-backend` folder.
     * Enter your Firebase database URL in the server's database configuration file: `/api-backend/models/db.js`.
     * Run `node index.js` from the root of the `/api-backend` directory to start the server.
     
@@ -34,3 +34,5 @@ Clone the Git repository for PTNS: `https://github.com/m-rashid/ptns.git`.
    * run the following in the command line: `npm install`
    * Configure your Firebase database credentials in `/src/firebase/firebase.js`
    * Run `npm start` from the root of the directory
+   
+[^1]: [This](https://github.com/kels-orien/real-time-pos-system.git) Github repository has been used as the base for the React front-end application in order to speed-up development. Special thanks to the contributors.
