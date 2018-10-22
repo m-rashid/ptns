@@ -1,0 +1,21 @@
+const firebase = require('firebase');
+
+const devConfig = {
+    apiKey: "AIzaSyA8bUQ8kkqLY53Bkl73oLdrYW3lYvserLQ",
+    authDomain: "ptns-b74f2.firebaseapp.com",
+    databaseURL: "https://ptns-b74f2.firebaseio.com",
+    projectId: "ptns-b74f2",
+    storageBucket: "ptns-b74f2.appspot.com",
+    messagingSenderId: "463871961734"
+};
+
+
+
+firebase.initializeApp(devConfig);
+
+
+const auth = firebase.auth();
+
+export {
+  auth, firebase
+};

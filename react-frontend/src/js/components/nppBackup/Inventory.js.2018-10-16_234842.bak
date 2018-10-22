@@ -1,0 +1,307 @@
+import React, { Component } from "react";
+import "./App.css";
+import Header from "./Header";
+import Product from "./Product";
+import axios from "axios";
+import { Modal, Button } from "react-bootstrap";
+
+const HOST = "http://localhost:3000";
+const INITIAL_STATE = {
+  products: [],
+  productFormModal: false,
+  name: "",
+  id: "",
+  snackMessage: "",
+  quantity: "",
+  price: "",
+  available_all_stores: ""
+};
+
+class Inventory extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = INITIAL_STATE;
+    this.handleNewProduct = this.handleNewProduct.bind(this);
+    this.handleDeleteProduct = this.handleDeleteProduct.bind(this);
+    this.handleName = this.handleName.bind(this);
+    this.handleId = this.handleId.bind(this);
+    this.handlePrice = this.handlePrice.bind(this);
+    this.handleQuantity = this.handleQuantity.bind(this);
+    this.handleSnackbar = this.handleSnackbar.bind(this);
+    this.handleLocations = this.handleLocations.bind(this);
+  }
+  componentWillMount() {
+    var url = HOST + `/products`;
+    axios.get(url).then(response => {
+      this.setState({ products: response.data });
+    });
+  }
+
+  handleNewProduct = e => {
+    e.preventDefault();
+    var newProduct = {
+      name: this.state.name,
+      id: this.state.id,
+      price: this.state.price,
+      quantity: this.state.quantity,
+      available_all_stores: this.state.available_all_stores
+    };
+    let axiosConfig = {
+      headers: {
+          'Content-Type': 'application/json;charset=UTF-8',
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,OPTIONS",
+          "Access-Control-Allow-Headers": "Origin,Content-type,Accept,X-Access-Token,X-Key"
+      }
+    };
+    axios
+      .post(HOST + `/products`, newProduct, axiosConfig)
+      .then(
+        response =>
+		console.log(newProduct),
+        this.setState({
+          products: [...this.state.products, newProduct], 
+          snackMessage: "Product Added Successfully!",
+          productFormModal: false,
+          available_all_stores: ""
+        }),
+        this.handleSnackbar()
+          /* axios.get(HOST + `/products`).then(response => {
+            this.setState(INITIAL_STATE);
+            this.setState({ products: response.data });
+            this.setState({ snackMessage: "Product Added Successfully!" });
+            this.handleSnackbar();
+          }) */
+      )
+      .catch(err => {
+        console.log(err),
+        this.setState({ snackMessage: `Product failed to save` , productFormModal: false}),
+        this.handleSnackbar();
+      });
+  };
+
+  handleEditProduct = (id, editProduct) => {
+    axios
+      .put(HOST + `/products/${id}`, editProduct)
+      .then(response => {
+        this.setState({ snackMessage: "Product Updated Successfully!" });
+        this.handleSnackbar();
+      })
+      .catch(err => {
+        console.log(err);
+        this.setState({ snackMessage: "Product Update Failed!" }),
+        this.handleSnackbar();
+      });
+  };
+
+  handleDeleteProduct = id => {
+    axios
+      .delete(HOST + `/products/${id}`)
+      .then(
+        response =>
+          axios.get(HOST + `/products`).then(response => {
+            this.setState(INITIAL_STATE),
+            this.setState({ products: response.data }),
+            this.setState({ snackMessage: "Product Deleted Successfully!" }),
+            this.handleSnackbar();
+          })
+      )
+      .catch(err => {
+        console.log(err);
+      })
+  }
+
+  handleName = e => {
+    this.setState({ name: e.target.value });
+  };
+  handleId = e => {
+    this.setState({ id: e.target.value });
+  };
+  handlePrice = e => {
+    this.setState({ price: e.target.value });
+  };
+  handleQuantity = e => {
+    this.setState({ quantity: e.target.value });
+  };
+  handleLocations = e => {
+    this.setState({ available_all_stores: e.target.value });
+  };
+  handleSnackbar = () => {
+    var bar = document.getElementById("snackbar");
+    bar.className = "show";
+    setTimeout(function() {
+      bar.className = bar.className.replace("show", "");
+    }.bind(this), 3000);
+  };
+
+  render() {
+    var { products, snackMessage } = this.state;
+
+    var renderProducts = () => {
+      if (products.length === 0) {
+        return <p>{products}</p>;
+      } else {
+        return products.map(product => (
+          <Product {...product} onEditProduct={this.handleEditProduct} onDeleteProduct={this.handleDeleteProduct}/>
+        ));
+      }
+    };
+
+    return (
+      <div>
+        <Header />
+
+        <div class="container">
+          <a
+            class="btn btn-success pull-right"
+            onClick={() => this.setState({ productFormModal: true })}
+          >
+            <i class="glyphicon glyphicon-plus" /> Add New Item
+          </a>
+          <br />
+          <br />
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Price</th>
+                <th scope="col">Quantity</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>{renderProducts()}</tbody>
+          </table>
+        </div>
+
+        <Modal show={this.state.productFormModal}>
+          <Modal.Header>
+            <Modal.Title>Add Product</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <form class="form-horizontal" name="newProductForm">
+              <div class="form-group">
+                <label class="col-md-4 control-label" for="barcode">
+                  Barcode
+                </label>
+                <div class="col-md-4">
+                  <input
+                    id="barcode"
+                    name="barcode"
+                    placeholder="Barcode"
+                    class="form-control"
+                  />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-md-4 control-label" for="name">
+                  Name*
+                </label>
+                <div class="col-md-4">
+                  <input
+                    name="name"
+                    placeholder="Name"
+                    class="form-control"
+                    onChange={this.handleName}
+                  />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-md-4 control-label" for="id">
+                  Id*
+                </label>
+                <div class="col-md-4">
+                  <input
+                    name="id"
+                    placeholder="Product Id"
+                    class="form-control"
+                    onChange={this.handleId}
+                  />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-md-4 control-label" for="price">
+                  Price*
+                </label>
+                <div class="col-md-4">
+                  <input
+                    name="price"
+                    placeholder="Price"
+                    class="form-control"
+                    onChange={this.handlePrice}
+                    type="number"
+                    step="any"
+                    min="0"
+                  />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-md-4 control-label" for="quantity_on_hand">
+                  Quantity*
+                </label>
+                <div class="col-md-4">
+                  <input
+                    name="quantity_on_hand"
+                    placeholder="Quantity On Hand"
+                    onChange={this.handleQuantity}
+                    class="form-control"
+                  />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-md-4 control-label" for="available_all_stores">
+                  Available at all locations?*
+                </label>
+                <div class="col-md-4">
+                <div class="radio">
+                  <label>
+                    <input
+                      type="radio"
+                      value="yes"
+                      checked={this.state.available_all_stores === "yes"}
+                      name="available_all_stores"
+                      onChange={this.handleLocations}
+                    />
+                    Yes
+                  </label>
+                </div>
+                <div class="radio">
+                  <label>
+                      <input
+                        type="radio"
+                        value="no"
+                        checked={this.state.available_all_stores === "no"}
+                        name="available_all_stores"
+                        onChange={this.handleLocations}
+                      />
+                      No
+                    </label>
+                </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-md-4 control-label" for="image">
+                  Upload Image
+                </label>
+                <div class="col-md-4">
+                  <input type="file" name="image" />
+                </div>
+              </div>
+              <br /> <br /> <br />
+            </form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={() => this.setState({ productFormModal: false })}>
+              Close
+            </Button>
+            <Button onClick={this.handleNewProduct}>Submit</Button>
+          </Modal.Footer>
+        </Modal>
+        <div id="snackbar">{snackMessage}</div>
+      </div>
+    );
+  }
+}
+
+export default Inventory;
