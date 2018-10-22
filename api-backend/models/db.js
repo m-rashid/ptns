@@ -8,10 +8,10 @@ const auth = firebase.auth();
 
 
 const admin = require('firebase-admin');
-const serviceAccount = require('../ptnsServiceAccountKey.json.json');
+const serviceAccount = require('../ptnsServiceAccountKey.json');
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://ptns-b74f2.firebaseio.com"
+    databaseURL: ""
 });
 
 const database = admin.database();
